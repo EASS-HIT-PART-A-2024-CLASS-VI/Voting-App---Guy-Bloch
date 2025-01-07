@@ -1,0 +1,35 @@
+/* General Styles */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: 1rem;
+  background-color: #007bff;
+  color: white;
+}
+
+/* Main Content */
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 0.5rem;
+  background-color: #343a40;
+  color: white;
+  font-size: 0.9rem;
+}
