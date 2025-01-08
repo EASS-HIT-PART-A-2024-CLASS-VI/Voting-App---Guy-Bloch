@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCandidates, addCandidate, castVote, fetchResults, deleteCandidate } from './api';
+import ResultsChart from './ResultsChart';
 
 function App() {
   const [candidates, setCandidates] = useState([]);
@@ -35,15 +36,14 @@ function App() {
     }
   };
 
-const handleVote = async (id) => {
-  try {
-    await castVote(id);
-    loadCandidates();
-  } catch (error) {
-    console.error('Error casting vote:', error);
-  }
-};
-
+  const handleVote = async (id) => {
+    try {
+      await castVote(id);
+      loadCandidates();
+    } catch (error) {
+      console.error('Error casting vote:', error);
+    }
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -66,6 +66,8 @@ const handleVote = async (id) => {
   return (
     <div>
       <h1>Voting App</h1>
+
+      {/* Add Candidate Section */}
       <div>
         <input
           value={name}
@@ -75,6 +77,7 @@ const handleVote = async (id) => {
         <button onClick={handleAddCandidate}>Add Candidate</button>
       </div>
 
+      {/* Candidates List */}
       <h2>Candidates</h2>
       <ul>
         {candidates.map((c) => (
@@ -86,16 +89,26 @@ const handleVote = async (id) => {
         ))}
       </ul>
 
+      {/* Show Results Button */}
       <button onClick={handleShowResults}>Show Results</button>
 
+      {/* Results Section */}
       <h2>Results</h2>
       <ul>
         {results.map((c) => (
           <li key={c.id}>
-            {c.name} - Votes: {c.votes}
+            {c.name} - Votes: {c.votes} - {c.percentage.toFixed(2)}%
           </li>
         ))}
       </ul>
+
+      {/* Results Chart */}
+      {results.length > 0 && (
+        <>
+          <h2>Voting Results Chart</h2>
+          <ResultsChart results={results} />
+        </>
+      )}
     </div>
   );
 }

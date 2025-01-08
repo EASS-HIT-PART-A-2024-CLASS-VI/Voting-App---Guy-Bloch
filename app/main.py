@@ -27,6 +27,12 @@ class CandidateCreate(BaseModel):
 class Vote(BaseModel):
     candidate_id: str
 
+class CandidateResult(BaseModel):
+    id: str
+    name: str
+    votes: int
+    percentage: float
+
 # In-Memory Database
 candidates = {}
 
@@ -64,6 +70,25 @@ def delete_candidate(candidate_id: str):
     return {"message": "Candidate deleted successfully"}
 
 
-@app.get("/results/", response_model=List[Candidate])
+@app.get("/results/", response_model=List[CandidateResult])
 def get_results():
-    return sorted(candidates.values(), key=lambda x: x.votes, reverse=True)
+    total_votes = sum(candidate.votes for candidate in candidates.values())
+    if total_votes == 0:
+        return [
+            CandidateResult(
+                id=candidate.id,
+                name=candidate.name,
+                votes=candidate.votes,
+                percentage=0.0
+            )
+            for candidate in candidates.values()
+        ]
+    return [
+        CandidateResult(
+            id=candidate.id,
+            name=candidate.name,
+            votes=candidate.votes,
+            percentage=round((candidate.votes / total_votes) * 100, 2)
+        )
+        for candidate in sorted(candidates.values(), key=lambda x: x.votes, reverse=True)
+    ]

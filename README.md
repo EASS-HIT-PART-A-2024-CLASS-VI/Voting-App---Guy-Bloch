@@ -1,9 +1,10 @@
-Voting App
+# Voting App
 
 A full-stack voting application built with FastAPI for the backend and React for the frontend, containerized using Docker and managed with Docker Compose.
 
-📁 Project Structure
+## 📁 Project Structure
 
+```
 pythonProject4/
 ├── app/                   # Backend application
 │   ├── main.py            # FastAPI backend logic
@@ -24,7 +25,7 @@ pythonProject4/
 │   ├── package.json      # Frontend dependencies
 │   ├── package-lock.json # Lock file for dependencies
 │
-├── integration_test     # Integration tests
+├── integration_test.py    # Integration tests
 │
 ├── venv/                 # Python virtual environment
 │
@@ -34,107 +35,90 @@ pythonProject4/
 ├── Dockerfile            # Main Dockerfile for the application
 ├── nginx.conf            # Nginx configuration for reverse proxy
 ├── README.md             # Documentation
+```
 
-🚀 Getting Started
+## 🚀 Getting Started
 
-Clone the Repository
-
+### Clone the Repository
+```bash
 git clone https://github.com/EASS-HIT-PART-A-2024-CLASS-VI/Voting-App---Guy-Bloch.git
 cd voting-app
+```
 
-Environment Setup
+### Environment Setup
 
-Backend
-
+#### Backend
+```bash
 cd app
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
+```
 
-Frontend
-
+#### Frontend
+```bash
 cd frontend
 npm install
+```
 
-Run with Docker Compose
-
+### Run with Docker Compose
+```bash
 docker-compose up --build
+```
 
-Access the Application
+### Access the Application
+- **Frontend:** `http://localhost:3000`
+- **Backend API:** `http://localhost:8000`
 
-Frontend: http://localhost:3000
+## 🧪 Testing
 
-Backend API: http://localhost:8000
+### Unit Tests
+- **Purpose:** Test individual components of the backend (e.g., API routes, services).
+- **File:** `app/unit_tests.py`
+- **Run Command (Bash):**
+  ```bash
+  pytest app/unit_tests.py
+  ```
+- **Run Command (Docker):**
+  ```bash
+     docker-compose run unit_tests
+  ```
 
-🧪 Testing
+### Integration Tests
+- **Purpose:** Test the interaction between components to ensure they work together.
+- **File:** `integration_tests/integration_test.py`
+- **Run Command (Bash):**
+  ```bash
+  pytest integration_test.py
+  ```
+- **Run Command (Docker):**
+  ```bash
+  docker-compose run integration_test
+  ```
 
-Unit Tests
+## 📜 API Endpoints
+- **POST /candidates/** - Add a new candidate
+- **GET /candidates/** - List all candidates
+- **POST /vote/** - Cast a vote
+- **DELETE /candidates/{id}** - Delete a candidate
+- **GET /results/** - Get voting results
 
-Purpose: Test individual components of the backend (e.g., API routes, services).
-
-File: app/unit_tests.py
-
-Run Command (Bash):
-
-pytest app/unit_tests.py
-
-Run Command (Docker):
-
-docker-compose run unit_tests
-
-Integration Tests
-
-Purpose: Test the interaction between components to ensure they work together.
-
-File: integration_test.py
-
-Run Command (Bash):
-
-pytest integration_test.py
-
-Run Command (Docker):
-
-docker-compose run integration_test
-
-Run both tests : 
-
-docker-compose up unit_tests integration_tests
-
-
-📜 API Endpoints
-
-POST /candidates/ - Add a new candidate
-
-GET /candidates/ - List all candidates
-
-POST /vote/ - Cast a vote
-
-DELETE /candidates/{id} - Delete a candidate
-
-GET /results/ - Get voting results
-
-📦 Deployment
-
+## 📦 Deployment
 Make sure to adjust the environment variables and run:
-
+```bash
 docker-compose -f docker-compose.prod.yml up --build
+```
 
-🛠️ Built With
+## 🛠️ Built With
+- **FastAPI:** Backend
+- **React:** Frontend
+- **Docker:** Containerization
+- **Nginx:** Reverse Proxy
+- **Pytest:** Testing Framework
 
-FastAPI: Backend
-
-React: Frontend
-
-Docker: Containerization
-
-Nginx: Reverse Proxy
-
-Pytest: Testing Framework
-
-🤝 Contributing
-
+## 🤝 Contributing
 Feel free to fork this repository, make changes, and submit a pull request!
 
-👤 Author
+## 👤 Author
+- **Guy Bloch**
 
-Guy Bloch
