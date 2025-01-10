@@ -27,13 +27,9 @@ pythonProject4/
 │
 ├── integration_test.py    # Integration tests
 │
-├── venv/                 # Python virtual environment
-│
-├── conf/                 # Configuration files (e.g., Nginx, environment configs)
-│
+├── venv/                 # Python virtual environment│
 ├── docker-compose.yml    # Docker Compose configuration
 ├── Dockerfile            # Main Dockerfile for the application
-├── nginx.conf            # Nginx configuration for reverse proxy
 ├── README.md             # Documentation
 ```
 
