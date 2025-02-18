@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from app import main  # Import your FastAPI app
+from main import app # Import your FastAPI app
 from bson import ObjectId  # For handling MongoDB ObjectIds
 
 # Initialize the test client
