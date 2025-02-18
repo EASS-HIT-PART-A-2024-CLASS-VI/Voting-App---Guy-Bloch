@@ -3,3 +3,11 @@ uvicorn
 pydantic
 pytest
 httpx
+motor
+bcrypt
+python-jose
+passlib
+python-dotenv
+psycopg2-binary
+sqlalchemy
+alembic

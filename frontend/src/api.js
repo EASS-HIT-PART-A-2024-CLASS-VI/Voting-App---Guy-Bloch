@@ -21,7 +21,7 @@ export const getCandidates = async () => {
 export const addCandidate = async (candidateData) => {
   try {
     const response = await api.post('/candidates', {
-      name: candidateData.name.trim()
+      name: candidateData.name.trim(),
     });
     return response.data;
   } catch (error) {
@@ -30,21 +30,16 @@ export const addCandidate = async (candidateData) => {
   }
 };
 
-
-
-
 // Cast a vote
 export const castVote = async (candidateId) => {
   try {
     const response = await api.post('/vote/', { candidate_id: candidateId });
     return response.data;
   } catch (error) {
-    console.error('Failed to cast vote:', error);
+    console.error('Failed to cast vote:', error.response?.data || error.message);
     throw error;
   }
 };
-
-
 
 // Fetch voting results
 export const fetchResults = async () => {
@@ -56,14 +51,14 @@ export const fetchResults = async () => {
     throw error;
   }
 };
+
 // Delete a candidate
 export const deleteCandidate = async (candidateId) => {
   try {
     const response = await api.delete(`/candidates/${candidateId}`);
     return response.data;
   } catch (error) {
-    console.error('Failed to delete candidate:', error);
+    console.error('Failed to delete candidate:', error.response?.data || error.message);
     throw error;
   }
 };
-

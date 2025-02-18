@@ -1,25 +1,46 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
-from uuid import uuid4
+from motor.motor_asyncio import AsyncIOMotorClient
+from bson import ObjectId
 
 app = FastAPI()
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allow frontend to make requests from localhost:3000
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+# MongoDB Configuration
+MONGO_URI = "mongodb://mongo:27017/my_database"
+DATABASE_NAME = "voting_db"
+COLLECTION_NAME = "candidates"
+
+client = None
+db = None
+candidates_collection = None
+
+@app.on_event("startup")
+async def startup_db_client():
+    global client, db, candidates_collection
+    client = AsyncIOMotorClient(MONGO_URI)
+    db = client[DATABASE_NAME]
+    candidates_collection = db[COLLECTION_NAME]
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
 
 # Data Models
 class Candidate(BaseModel):
-    id: str
-    name: str
-    votes: int = 0
+    id: str = Field(..., description="The unique identifier for the candidate")
+    name: str = Field(..., description="The name of the candidate")
+    votes: int = Field(default=0, description="The number of votes the candidate has received")
 
 class CandidateCreate(BaseModel):
     name: str
@@ -27,68 +48,75 @@ class CandidateCreate(BaseModel):
 class Vote(BaseModel):
     candidate_id: str
 
-class CandidateResult(BaseModel):
-    id: str
-    name: str
-    votes: int
-    percentage: float
+class CandidateResult(Candidate):
+    percentage: float = Field(..., description="The percentage of total votes the candidate has received")
 
-# In-Memory Database
-candidates = {}
-
-
+# Add Candidate
 @app.post("/candidates/", response_model=Candidate)
-def add_candidate(candidate: CandidateCreate):
-    candidate_id = str(uuid4())
-    new_candidate = Candidate(id=candidate_id, name=candidate.name, votes=0)
-    candidates[candidate_id] = new_candidate
-    return new_candidate
+async def add_candidate(candidate: CandidateCreate):
+    try:
+        new_candidate = {"name": candidate.name, "votes": 0}
+        result = await candidates_collection.insert_one(new_candidate)
+        return Candidate(id=str(result.inserted_id), name=candidate.name, votes=0)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to add candidate: {str(e)}")
 
-
+# List Candidates
 @app.get("/candidates/", response_model=List[Candidate])
-def list_candidates():
-    return list(candidates.values())
+async def list_candidates():
+    candidates = await candidates_collection.find().to_list(None)
+    return [Candidate(id=str(c["_id"]), name=c["name"], votes=c["votes"]) for c in candidates]
 
-
+# Cast Vote
 @app.post("/vote/")
-def cast_vote(vote: Vote):
-    if not vote.candidate_id:
-        raise HTTPException(status_code=422, detail="candidate_id is required")
+async def cast_vote(vote: Vote):
+    if not ObjectId.is_valid(vote.candidate_id):
+        raise HTTPException(status_code=400, detail="Invalid candidate ID")
 
-    if vote.candidate_id not in candidates:
+    candidate = await candidates_collection.find_one({"_id": ObjectId(vote.candidate_id)})
+    if not candidate:
         raise HTTPException(status_code=404, detail="Candidate not found")
 
-    candidates[vote.candidate_id].votes += 1
+    await candidates_collection.update_one(
+        {"_id": ObjectId(vote.candidate_id)},
+        {"$inc": {"votes": 1}}
+    )
     return {"message": "Vote cast successfully"}
 
-
+# Delete Candidate
 @app.delete("/candidates/{candidate_id}")
-def delete_candidate(candidate_id: str):
-    if candidate_id not in candidates:
+async def delete_candidate(candidate_id: str):
+    if not ObjectId.is_valid(candidate_id):
+        raise HTTPException(status_code=400, detail="Invalid candidate ID")
+
+    result = await candidates_collection.delete_one({"_id": ObjectId(candidate_id)})
+    if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Candidate not found")
-    del candidates[candidate_id]
+
     return {"message": "Candidate deleted successfully"}
 
-
+# Get Results
 @app.get("/results/", response_model=List[CandidateResult])
-def get_results():
-    total_votes = sum(candidate.votes for candidate in candidates.values())
+async def get_results():
+    candidates = await candidates_collection.find().to_list(None)
+    total_votes = sum(c["votes"] for c in candidates)
+
     if total_votes == 0:
         return [
-            CandidateResult(
-                id=candidate.id,
-                name=candidate.name,
-                votes=candidate.votes,
-                percentage=0.0
-            )
-            for candidate in candidates.values()
+            CandidateResult(id=str(c["_id"]), name=c["name"], votes=c["votes"], percentage=0.0)
+            for c in candidates
         ]
-    return [
+
+    results = [
         CandidateResult(
-            id=candidate.id,
-            name=candidate.name,
-            votes=candidate.votes,
-            percentage=round((candidate.votes / total_votes) * 100, 2)
+            id=str(c["_id"]),
+            name=c["name"],
+            votes=c["votes"],
+            percentage=round((c["votes"] / total_votes) * 100, 2)
         )
-        for candidate in sorted(candidates.values(), key=lambda x: x.votes, reverse=True)
+        for c in candidates
     ]
+
+    # Sort by votes in descending order
+    results.sort(key=lambda x: x.votes, reverse=True)
+    return results

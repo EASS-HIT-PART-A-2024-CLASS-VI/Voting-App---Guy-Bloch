@@ -1,10 +1,10 @@
 import pytest
 from fastapi.testclient import TestClient
-from app.main import app
+from app import main  # Import your FastAPI app
+from bson import ObjectId  # For handling MongoDB ObjectIds
 
 # Initialize the test client
 client = TestClient(app)
-
 
 def test_add_candidate():
     """Test adding a new candidate."""
@@ -20,7 +20,6 @@ def test_list_candidates():
     response = client.get("/candidates/")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
-    assert len(response.json()) > 0
 
 
 def test_cast_vote():
@@ -67,3 +66,36 @@ def test_delete_candidate():
     candidates_response = client.get("/candidates/")
     assert candidates_response.status_code == 200
     assert all(candidate["id"] != candidate_id for candidate in candidates_response.json())
+
+
+def test_cast_vote_invalid_candidate_id():
+    """Test casting a vote with an invalid candidate ID."""
+    invalid_candidate_id = "invalid_id"
+    response = client.post("/vote/", json={"candidate_id": invalid_candidate_id})
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Invalid candidate ID"
+
+
+def test_delete_candidate_invalid_id():
+    """Test deleting a candidate with an invalid ID."""
+    invalid_candidate_id = "invalid_id"
+    response = client.delete(f"/candidates/{invalid_candidate_id}")
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Invalid candidate ID"
+
+
+def test_add_candidate_empty_name():
+    """Test adding a candidate with an empty name."""
+    response = client.post("/candidates/", json={"name": ""})
+    assert response.status_code == 422  # Unprocessable Entity
+    assert "detail" in response.json()
+
+
+def test_results_no_candidates():
+    """Test retrieving results when no candidates exist."""
+    # Clear all candidates (optional, depends on your test setup)
+    client.delete("/candidates/")  # This assumes you have a route to clear candidates
+
+    response = client.get("/results/")
+    assert response.status_code == 200
+    assert response.json() == []

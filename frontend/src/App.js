@@ -30,7 +30,7 @@ function App() {
     try {
       await addCandidate({ name });
       setName('');
-      loadCandidates();
+      loadCandidates(); // Refresh candidate list
     } catch (error) {
       console.error('Error adding candidate:', error);
     }
@@ -39,7 +39,7 @@ function App() {
   const handleVote = async (id) => {
     try {
       await castVote(id);
-      loadCandidates();
+      loadCandidates(); // Refresh after voting
     } catch (error) {
       console.error('Error casting vote:', error);
     }
@@ -48,7 +48,7 @@ function App() {
   const handleDelete = async (id) => {
     try {
       await deleteCandidate(id);
-      loadCandidates();
+      loadCandidates(); // Refresh after deletion
     } catch (error) {
       console.error('Error deleting candidate:', error);
     }
@@ -81,7 +81,7 @@ function App() {
       <h2>Candidates</h2>
       <ul>
         {candidates.map((c) => (
-          <li key={c.id}>
+          <li key={c.id}> {/* Use c.id instead of c._id */}
             {c.name} - Votes: {c.votes}
             <button onClick={() => handleVote(c.id)}>Vote</button>
             <button onClick={() => handleDelete(c.id)}>Delete</button>
@@ -96,7 +96,7 @@ function App() {
       <h2>Results</h2>
       <ul>
         {results.map((c) => (
-          <li key={c.id}>
+          <li key={c.id}> {/* Use c.id instead of c._id */}
             {c.name} - Votes: {c.votes} - {c.percentage.toFixed(2)}%
           </li>
         ))}
