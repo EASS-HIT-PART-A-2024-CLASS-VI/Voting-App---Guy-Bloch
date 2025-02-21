@@ -7,7 +7,5 @@ motor
 bcrypt
 python-jose
 passlib
-python-dotenv
-psycopg2-binary
-sqlalchemy
-alembic
+pymongo
+pytest-asyncio

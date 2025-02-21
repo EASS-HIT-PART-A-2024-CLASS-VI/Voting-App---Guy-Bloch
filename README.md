@@ -10,7 +10,6 @@ pythonProject4/
 │   ├── main.py            # FastAPI backend logic
 │   ├── requirements.txt   # Backend dependencies
 │   ├── unit_tests.py      # Backend unit tests
-│
 ├── frontend/              # Frontend application
 │   ├── public/
 │   │   ├── index.html     # Root HTML file
@@ -20,20 +19,14 @@ pythonProject4/
 │   │   ├── config.js      # Configurations (API URL, etc.)
 │   │   ├── index.css      # Global styles
 │   │   ├── index.js       # Entry point for React app
-│   ├── .env              # Environment variables for frontend
 │   ├── Dockerfile        # Dockerfile for frontend
 │   ├── package.json      # Frontend dependencies
 │   ├── package-lock.json # Lock file for dependencies
 │
 ├── integration_test.py    # Integration tests
 │
-├── venv/                 # Python virtual environment
-│
-├── conf/                 # Configuration files (e.g., Nginx, environment configs)
-│
 ├── docker-compose.yml    # Docker Compose configuration
 ├── Dockerfile            # Main Dockerfile for the application
-├── nginx.conf            # Nginx configuration for reverse proxy
 ├── README.md             # Documentation
 ```
 
@@ -112,8 +105,8 @@ docker-compose -f docker-compose.prod.yml up --build
 ## 🛠️ Built With
 - **FastAPI:** Backend
 - **React:** Frontend
+- **mongoDB:** Data-Base
 - **Docker:** Containerization
-- **Nginx:** Reverse Proxy
 - **Pytest:** Testing Framework
 
 ## 🤝 Contributing

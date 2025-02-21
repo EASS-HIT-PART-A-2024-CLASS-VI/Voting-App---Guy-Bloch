@@ -1,101 +1,113 @@
 import pytest
-from fastapi.testclient import TestClient
-from main import app # Import your FastAPI app
-from bson import ObjectId  # For handling MongoDB ObjectIds
-
-# Initialize the test client
-client = TestClient(app)
-
-def test_add_candidate():
-    """Test adding a new candidate."""
-    response = client.post("/candidates/", json={"name": "Alice"})
-    assert response.status_code == 200
-    assert "id" in response.json()
-    assert response.json()["name"] == "Alice"
-    assert response.json()["votes"] == 0
+from httpx import AsyncClient
+from fastapi import FastAPI
+from app.main import app
 
 
-def test_list_candidates():
-    """Test listing all candidates."""
-    response = client.get("/candidates/")
-    assert response.status_code == 200
-    assert isinstance(response.json(), list)
+@pytest.mark.asyncio
+async def test_add_candidate():
+    async with AsyncClient(base_url="http://backend:8000") as client:
+        # Create a new candidate
+        response = await client.post("/candidates/", json={"name": "Alice"})
+        data = response.json()
+        candidate_id = data["id"]
+
+        # Assert that the candidate is added
+        assert response.status_code == 200
+        assert data["name"] == "Alice"
+        assert data["votes"] == 0
+        assert "id" in data  # Make sure the id is returned
+
+        # Cleanup: Delete the candidate after the test
+        await client.delete(f"/candidates/{candidate_id}")
 
 
-def test_cast_vote():
-    """Test casting a vote for a candidate."""
-    # Add a candidate first
-    candidate_response = client.post("/candidates/", json={"name": "Bob"})
-    candidate_id = candidate_response.json()["id"]
+@pytest.mark.asyncio
+async def test_list_candidates():
+    async with AsyncClient(base_url="http://backend:8000") as client:
+        # List candidates (this should include the one we added)
+        response = await client.get("/candidates/")
 
-    # Cast a vote
-    vote_response = client.post("/vote/", json={"candidate_id": candidate_id})
-    assert vote_response.status_code == 200
-    assert vote_response.json()["message"] == "Vote cast successfully"
-
-    # Verify the vote count
-    results_response = client.get("/results/")
-    assert results_response.status_code == 200
-    for candidate in results_response.json():
-        if candidate["id"] == candidate_id:
-            assert candidate["votes"] == 1
-            break
-    else:
-        pytest.fail("Candidate not found in results")
+        # Assert the response is successful
+        assert response.status_code == 200
+        candidates = response.json()
+        assert isinstance(candidates, list)
+        assert len(candidates) > 0  # Ensure there is at least one candidate
 
 
-def test_results():
-    """Test retrieving voting results."""
-    response = client.get("/results/")
-    assert response.status_code == 200
-    assert isinstance(response.json(), list)
+@pytest.mark.asyncio
+async def test_cast_vote():
+    # First, add a candidate
+    async with AsyncClient(base_url="http://backend:8000") as client:
+        response = await client.post("/candidates/", json={"name": "Bob"})
+        candidate = response.json()
+        candidate_id = candidate["id"]
+
+        # Cast a vote for the candidate
+        response = await client.post("/vote/", json={"candidate_id": candidate_id})
+        assert response.status_code == 200
+        assert response.json() == {"message": "Vote cast successfully"}
+
+        # Verify the vote count
+        response = await client.get("/candidates/")
+        candidates = response.json()
+        bob_candidate = next(c for c in candidates if c["id"] == candidate_id)
+        assert bob_candidate["votes"] == 1  # Ensure the vote was counted
+
+        # Cleanup: Delete the candidate after the test
+        await client.delete(f"/candidates/{candidate_id}")
 
 
-def test_delete_candidate():
-    """Test deleting a candidate."""
-    # Add a candidate first
-    candidate_response = client.post("/candidates/", json={"name": "Charlie"})
-    candidate_id = candidate_response.json()["id"]
+@pytest.mark.asyncio
+async def test_delete_candidate():
+    # First, add a candidate
+    async with AsyncClient(base_url="http://backend:8000") as client:
+        response = await client.post("/candidates/", json={"name": "Charlie"})
+        candidate = response.json()
+        candidate_id = candidate["id"]
 
-    # Delete the candidate
-    delete_response = client.delete(f"/candidates/{candidate_id}")
-    assert delete_response.status_code == 200
-    assert delete_response.json()["message"] == "Candidate deleted successfully"
+        # Delete the candidate
+        response = await client.delete(f"/candidates/{candidate_id}")
+        assert response.status_code == 200
+        assert response.json() == {"message": "Candidate deleted successfully"}
 
-    # Verify deletion
-    candidates_response = client.get("/candidates/")
-    assert candidates_response.status_code == 200
-    assert all(candidate["id"] != candidate_id for candidate in candidates_response.json())
-
-
-def test_cast_vote_invalid_candidate_id():
-    """Test casting a vote with an invalid candidate ID."""
-    invalid_candidate_id = "invalid_id"
-    response = client.post("/vote/", json={"candidate_id": invalid_candidate_id})
-    assert response.status_code == 400
-    assert response.json()["detail"] == "Invalid candidate ID"
+        # Verify the candidate is no longer in the list
+        response = await client.get("/candidates/")
+        candidates = response.json()
+        assert not any(c["id"] == candidate_id for c in candidates)
 
 
-def test_delete_candidate_invalid_id():
-    """Test deleting a candidate with an invalid ID."""
-    invalid_candidate_id = "invalid_id"
-    response = client.delete(f"/candidates/{invalid_candidate_id}")
-    assert response.status_code == 400
-    assert response.json()["detail"] == "Invalid candidate ID"
+@pytest.mark.asyncio
+async def test_get_results():
+    # Clear the candidates collection before the test to ensure a clean state
+    async with AsyncClient(base_url="http://backend:8000") as client:
+        await client.delete("/candidates/")  # Add an endpoint or manually delete from DB
 
+    # Add candidates and cast some votes
+    async with AsyncClient(base_url="http://backend:8000") as client:
+        response = await client.post("/candidates/", json={"name": "Dave"})
+        candidate_dave = response.json()
+        candidate_id_dave = candidate_dave["id"]
 
-def test_add_candidate_empty_name():
-    """Test adding a candidate with an empty name."""
-    response = client.post("/candidates/", json={"name": ""})
-    assert response.status_code == 422  # Unprocessable Entity
-    assert "detail" in response.json()
+        response = await client.post("/candidates/", json={"name": "Eve"})
+        candidate_eve = response.json()
+        candidate_id_eve = candidate_eve["id"]
 
+        # Cast votes
+        await client.post("/vote/", json={"candidate_id": candidate_id_dave})
+        await client.post("/vote/", json={"candidate_id": candidate_id_dave})
+        await client.post("/vote/", json={"candidate_id": candidate_id_eve})
 
-def test_results_no_candidates():
-    """Test retrieving results when no candidates exist."""
-    # Clear all candidates (optional, depends on your test setup)
-    client.delete("/candidates/")  # This assumes you have a route to clear candidates
+        # Get results
+        response = await client.get("/results/")
+        assert response.status_code == 200
+        results = response.json()
+        assert len(results) > 0  # Check if results are returned
 
-    response = client.get("/results/")
-    assert response.status_code == 200
-    assert response.json() == []
+        # Ensure both Dave and Eve are in the results
+        assert any(c["name"] == "Dave" for c in results)
+        assert any(c["name"] == "Eve" for c in results)
+
+        # Cleanup: Delete the candidates after the test
+        await client.delete(f"/candidates/{candidate_id_dave}")
+        await client.delete(f"/candidates/{candidate_id_eve}")

@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
-      - MONGO_URL=mongodb://mongo:27017/my_database  # Add MongoDB connection string
+      - MONGO_URI=mongodb://mongo:27017/my_database  # Add MongoDB connection string
     depends_on:
       - mongo
     networks:

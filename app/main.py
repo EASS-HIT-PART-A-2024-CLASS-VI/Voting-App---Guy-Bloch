@@ -4,8 +4,30 @@ from pydantic import BaseModel, Field
 from typing import List
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
+from contextlib import asynccontextmanager
+import os
 
-app = FastAPI()
+
+# MongoDB Configuration
+
+MONGO_URI = os.getenv("TEST_MONGO_URI","mongodb://mongo:27017/my_database")
+DATABASE_NAME = os.getenv("TEST_DATABASE_NAME","voting_db")
+COLLECTION_NAME = os.getenv("TEST_COLLECTION_NAME", "candidates")
+
+client = None
+db = None
+candidates_collection = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global client, db, candidates_collection
+    client = AsyncIOMotorClient(MONGO_URI)
+    db = client[DATABASE_NAME]
+    candidates_collection = db[COLLECTION_NAME]
+    yield  # This allows FastAPI to run the app
+    client.close()
+
+app = FastAPI(lifespan=lifespan)
 
 # Add CORS middleware
 app.add_middleware(
@@ -15,26 +37,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# MongoDB Configuration
-MONGO_URI = "mongodb://mongo:27017/my_database"
-DATABASE_NAME = "voting_db"
-COLLECTION_NAME = "candidates"
-
-client = None
-db = None
-candidates_collection = None
-
-@app.on_event("startup")
-async def startup_db_client():
-    global client, db, candidates_collection
-    client = AsyncIOMotorClient(MONGO_URI)
-    db = client[DATABASE_NAME]
-    candidates_collection = db[COLLECTION_NAME]
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
 
 # Data Models
 class Candidate(BaseModel):
