@@ -1,5 +1,5 @@
 # Voting App
-![image](https://github.com/user-attachments/assets/91bb6bf3-1271-45a3-be53-5c97d0d7f948)
+                                         ![image](https://github.com/user-attachments/assets/91bb6bf3-1271-45a3-be53-5c97d0d7f948)
 
 A full-stack voting application built with FastAPI for the backend and React for the frontend, containerized using Docker and managed with Docker Compose.
 
