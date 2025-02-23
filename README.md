@@ -6,7 +6,7 @@ A full-stack voting application built with FastAPI for the backend and React for
 ## 📁 Project Structure
 
 ```
-pythonProject4/
+VotingApp/
 ├── app/                   # Backend application
 │   ├── main.py            # FastAPI backend logic
 │   ├── requirements.txt   # Backend dependencies
