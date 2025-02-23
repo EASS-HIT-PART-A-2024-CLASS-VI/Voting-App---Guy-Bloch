@@ -97,11 +97,6 @@ docker-compose up --build
 - **DELETE /candidates/{id}** - Delete a candidate
 - **GET /results/** - Get voting results
 
-## 📦 Deployment
-Make sure to adjust the environment variables and run:
-```bash
-docker-compose -f docker-compose.prod.yml up --build
-```
 
 ## 🛠️ Built With
 - **FastAPI:** Backend
