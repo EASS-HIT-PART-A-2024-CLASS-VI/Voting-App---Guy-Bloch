@@ -69,25 +69,27 @@ npm install
 ### Unit Tests
 - **Purpose:** Test individual components of the backend (e.g., API routes, services).
 - **File:** `app/unit_tests.py`
-- **Run Command (Bash):**
-  ```bash
-  pytest app/unit_tests.py
-  ```
+
 - **Run Command (Docker):**
   ```bash
      docker-compose run unit_tests
+  ```
+  - **Run Command (Bash):**
+  ```bash
+  pytest app/unit_tests.py
   ```
 
 ### Integration Tests
 - **Purpose:** Test the interaction between components to ensure they work together.
 - **File:** `integration_tests/integration_test.py`
-- **Run Command (Bash):**
-  ```bash
-  pytest integration_test.py
-  ```
+
 - **Run Command (Docker):**
   ```bash
   docker-compose run integration_test
+  ```
+  - **Run Command (Bash):**
+  ```bash
+  pytest integration_test.py
   ```
 
 ## 📜 API Endpoints
