@@ -36,7 +36,11 @@ VotingApp/
 ### Clone the Repository
 ```bash
 git clone https://github.com/EASS-HIT-PART-A-2024-CLASS-VI/Voting-App---Guy-Bloch.git
-cd voting-app
+cd Voting-App---Guy-Bloch
+```
+### Run with Docker Compose
+```bash
+docker-compose up --build
 ```
 
 ### Environment Setup
@@ -55,10 +59,6 @@ cd frontend
 npm install
 ```
 
-### Run with Docker Compose
-```bash
-docker-compose up --build
-```
 
 ### Access the Application
 - **Frontend:** `http://localhost:3000
