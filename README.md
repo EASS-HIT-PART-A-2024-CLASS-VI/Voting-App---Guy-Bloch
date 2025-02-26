@@ -33,6 +33,8 @@ VotingApp/
 ├── Dockerfile            # Main Dockerfile for the application
 ├── README.md             # Documentation
 ```
+![image](https://github.com/user-attachments/assets/7c77e597-4b9b-4326-848a-2e2df52aaf1e)
+
 
 ## 🚀 Getting Started
 
