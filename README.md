@@ -4,7 +4,8 @@
 A full-stack voting application built with FastAPI for the backend and React for the frontend, containerized using Docker and managed with Docker Compose.
 
 # Demo Video
-https://youtu.be/vbqWLjg0Xuw?si=_ci7yyyh3PuhNoD2
+[![Watch the video](https://img.youtube.com/vi/vbqWLjg0Xuw/0.jpg)](https://www.youtube.com/watch?v=vbqWLjg0Xuw)
+
 
 ## 📁 Project Structure
 
