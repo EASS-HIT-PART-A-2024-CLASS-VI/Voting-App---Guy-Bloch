@@ -1,7 +1,10 @@
 # Voting App
 ![image](https://github.com/user-attachments/assets/914d3ca2-2562-4953-b44f-a6fe41274ee4)
 
-A full-stack voting application built with FastAPI for the backend and React for the frontend, containerized using Docker and managed with Docker Compose.
+A full-stack voting application built with FastAPI for the backend, React for the frontend and MongoDB (database). It allows users to add candidates, vote for them, delete them and watch the vote statistc.
+containerized using Docker and managed with Docker Compose.
+
+
 
 # Demo Video
 [![Watch the video](https://img.youtube.com/vi/vbqWLjg0Xuw/0.jpg)](https://www.youtube.com/watch?v=vbqWLjg0Xuw)
